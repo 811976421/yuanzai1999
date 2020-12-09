@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .layui-form-checkbox i {
+            right: -10px;
+        }
+        .layui-table-cell {
+            height: 50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>o2o商城</cite></a><span lay-separator="">/</span>
+        <a><cite>店铺审核</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline" style="min-width: 200px">
+            <input class="layui-input" name="mobile" placeholder="手机号" autocomplete="off">
+        </div>
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <table id="review" lay-filter="review"></table>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    layui.use(['table', 'form'], function(){
+        var table = layui.table;
+
+        table.render({
+            elem: '#review'
+            ,title: '自营商城表'
+            ,cols: [[
+                {field: 'mobile', title: '会员手机号', minWidth: '120'}
+                ,{field: 'username', title: '会员昵称'}
+                ,{field: 'shop_name', title: '店铺名称'}
+                ,{field: 'shop_logo', title: '店铺logo', templet: function(d){
+                        return "<img width='50' src={$img_src}" + d.shop_logo + ' alt="">';
+                    }}
+                ,{field: 'shop_bg', title: '店铺背景', templet: function(d){
+                        return "<img width='50' src={$img_src}" + d.shop_bg + ' alt="">';
+                    }}
+                ,{field: 'address', title: '店铺地址'}
+                ,{field: 'contacts', title: '联系人邀请码'}
+                ,{field: 'contact_mobile', title: '推荐人电话'}
+                ,{field: 'bond_money', title: '保证金'}
+                ,{field: 'create_time', title: '添加时间', fixed: 'right', minWidth: '130'}
+                {if $Think.session.adminInfo.role_id == 1}
+                ,{field: 'reviewer', title: '审核人', align: 'center', fixed: 'right', minWidth: '100'}
+                {/if}
+                ,{field: 'status', title: '状态', templet: '#statusTpl', align: 'center', fixed: 'right', minWidth: '150'}
+                ,{title: '操作', fixed: 'right', toolbar: '#bar', minWidth: '150', align: 'center'}
+            ]]
+            ,url: '/index/Nearbyshops/getorders'
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+        });
+
+        table.on('tool(review)', function(obj){
+            var data = obj.data;
+            var layEvent = obj.event;
+
+            if (layEvent == 'disable') {
+                $.ajax({
+                    url: '/index/Nearbyshops/handler',
+                    data: {
+                        'action': 'disable',
+                        'id': data.id,
+                    },
+                    dataType: 'json',
+                    type: 'post',
+                    success:function (res) {
+                        if (res.code == '200') {
+                            notice.success(res.message);
+                            obj.update({
+                                status: '4'
+                            });
+                        } else {
+                            notice.error(res.message);
+                        }
+                    }
+                })
+            } else if (layEvent == 'enable') {
+                $.ajax({
+                    url: '/index/Nearbyshops/handler',
+                    data: {
+                        'action': 'enable',
+                        'id': data.id,
+                    },
+                    dataType: 'json',
+                    type: 'post',
+                    success:function (res) {
+                        if (res.code == '200') {
+                            notice.success(res.message);
+                            obj.update({
+                                status: '2'
+                            });
+                        } else {
+                            notice.error(res.message);
+                        }
+                    }
+                })
+            } else if (layEvent == 'passed') {
+                $.ajax({
+                    url: '/index/Nearbyshops/handler',
+                    data: {
+                        'action': 'passed',
+                        'id': data.id,
+                    },
+                    dataType: 'json',
+                    type: 'post',
+                    success:function (res) {
+                        if (res.code == '200') {
+                            notice.success(res.message);
+                        } else {
+                            notice.error(res.message);
+                        }
+                    }
+                })
+            } else if (layEvent == 'down') {
+                $.ajax({
+                    url: '/index/Nearbyshops/handler',
+                    data: {
+                        'action': 'down',
+                        'id': data.id,
+                    },
+                    dataType: 'json',
+                    type: 'post',
+                    success:function (res) {
+                        if (res.code == '200') {
+                            notice.success(res.message);
+                        } else {
+                            notice.error(res.message);
+                        }
+                    }
+                })
+            }
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                table.reload('review', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        mobile: $("input[name='mobile']").val(),
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.search').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
+<script type="text/html" id="statusTpl">
+    {{#  if(d.status == 0){ }}
+    待审核
+    {{#  } else if(d.status == 1) { }}
+    待交保证金
+    {{#  } else if(d.status == 2) { }}
+    审核通过(启用)
+    {{#  } else if(d.status == 3) { }}
+    审核未通过
+    {{#  } else if(d.status == 4) { }}
+    禁用
+    {{#  } else if(d.status == 5) { }}
+    已审(代理)
+    {{#  } }}
+</script>
+<script type="text/html" id="bar">
+    {{#  if(d.status == 0 || d.status == 5){ }}
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" style="width: 25px" title="通过" lay-event="passed">
+        <i class="layui-icon">&#xe605;</i>
+    </button>
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" style="width: 25px" title="驳回" lay-event="down">
+        <i class="layui-icon">&#x1006;</i>
+    </button>
+    {{#  } else if(d.status == 2){ }}
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" style="width: 25px" title="禁用" lay-event="disable">
+        <i class="layui-icon">&#xe616;</i>
+    </button>
+    {{#  } else if(d.status == 4) { }}
+    <button type="button" class="layui-btn layui-btn-primary layui-btn-xs" style="width: 25px" title="启用" lay-event="enable">
+        <i class="layui-icon">&#xe61f;</i>
+    </button>
+    {{#  } }}
+</script>
+</html>

@@ -1,0 +1,61 @@
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/plugins/layui/layui.js"></script>
+<script>
+
+    if ('{$refresh|default='0'}' == 1) {
+        parent.location.reload();
+    }
+
+    var notice;
+
+    layui.config({
+        base: '/static/plugins/layuinotice/dist/'
+    });
+
+    layui.use(['notice'], function () {
+        notice = layui.notice; // 允许别名 toastr
+
+        // 初始化配置，同一样式只需要配置一次，非必须初始化，有默认配置
+        notice.options = {
+            closeButton:true,//显示关闭按钮
+            debug:false,//启用debug
+            positionClass:"toast-top-center",//弹出的位置,
+            showDuration:"1000",//显示的时间
+            hideDuration:"1000",//消失的时间
+            timeOut:"2000",//停留的时间
+            extendedTimeOut:"1000",//
+            showEasing:"swing",//显示时的动画缓冲方式控制时间
+            hideEasing:"linear",//消失时的动画缓冲方式
+            iconClass: 'toast-info', // 自定义图标，有内置，如不需要则传空 支持layui内置图标/自定义iconfont类名
+            onclick: null, // 点击关闭回调
+        };
+    });
+
+    function isMobile() {
+        var userAgentInfo = navigator.userAgent;
+
+        var mobileAgents = [ "Android", "iPhone", "SymbianOS", "Windows Phone", "iPad","iPod"];
+
+        var mobile_flag = false;
+
+        //根据userAgent判断是否是手机
+        for (var v = 0; v < mobileAgents.length; v++) {
+            if (userAgentInfo.indexOf(mobileAgents[v]) > 0) {
+                mobile_flag = true;
+                break;
+            }
+        }
+
+        var screen_width = window.screen.width;
+        var screen_height = window.screen.height;
+
+        //根据屏幕分辨率判断是否是手机
+        if(screen_width < 500 && screen_height < 800){
+            mobile_flag = true;
+        }
+
+        return mobile_flag;
+    }
+
+
+</script>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .layui-form-checkbox i {
+            right: -10px;
+        }
+        .layui-table-cell {
+            height: 50px;
+            line-height: 50px;
+        }
+        .layui-table-cell, .layui-table-tool-panel li{
+            overflow:visible !important;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>自营商城</cite></a><span lay-separator="">/</span>
+        <a><cite>审核</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline" style="min-width: 200px">
+            <input class="layui-input" name="mobile" placeholder="手机号" autocomplete="off">
+        </div>
+        <div class="layui-inline" style="min-width: 150px">
+            <input class="layui-input" name="username" placeholder="用户名" autocomplete="off">
+        </div>
+
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <table id="user" lay-filter="user"></table>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    //配置插件目录
+    layui.config({
+        base: '/static/plugins/mods/'
+        , version: '1.0'
+    });
+
+    layui.use(['table', 'layarea', 'form'], function(){
+        var table = layui.table
+            ,form = layui.form
+        , layarea = layui.layarea;
+
+        table.render({
+            elem: '#user'
+            ,title: '代理表'
+            ,toolbar: '#area_picker_demo'
+            ,defaultToolbar: []
+            ,cols: [[
+                {type:'radio'}
+                ,{field: 'username', title: '用户名'}
+                ,{field: 'referrer', title: '推荐人'}
+                ,{field: 'mobile', title: '会员手机号'}
+                ,{field: 'grade_id', title: '会员等级', templet: '#gradeTpl'}
+                ,{field: 'proxy_level', title: '代理等级', templet: function (d) {
+                        if (d.proxy_level == '1') {
+                            return '市代理';
+                        } else if (d.proxy_level == '2'){
+                            return '区代理';
+                        } else {
+                            return '无';
+                        }
+                    }}
+                ,{field: 'area', title: '管辖范围'}
+            ]]
+            ,url: '/index/proxy/getlist'
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+            ,done: function () {
+                layarea.render({
+                    elem: '#area-picker',
+                    change: function (res) {
+                        //选择结果
+                        console.log(res);
+                    }
+                });
+            }
+        });
+
+        table.on('toolbar(user)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            if (data.length == 0) {
+                layer.msg('未选中对象');
+                return false;
+            }
+            if ($("select[name='proxy_level']").val() == '') {
+                layer.msg('请选择代理等级');
+                return false;
+            }
+            switch(obj.event){
+                case 'submit':
+                    $.ajax({
+                        url: '/index/proxy/handler',
+                        data: {
+                            'proxy_id': data[0].id,
+                            'proxy_level': $("select[name='proxy_level']").val(),
+                            'province': $("select[name='province']").val(),
+                            'city': $("select[name='city']").val(),
+                            'county': $("select[name='county']").val(),
+                        },
+                        dataType: 'json',
+                        type: 'post',
+                        success:function (res) {
+                            if (res.code == '200') {
+                                notice.success(res.message);
+                            } else {
+                                notice.error(res.message);
+                            }
+                        }
+                    });
+                    break;
+            };
+        });
+
+        table.on('radio(user)', function(obj){
+            if (obj.data.proxy_level) {
+                $('#area-picker').find("select[name='proxy_level']").val(obj.data.proxy_level);
+                if (obj.data.proxy_level == '1') {
+                    $(".county").css('display', 'none');
+                }
+                layarea.render({
+                    elem: '#area-picker',
+                    data: {
+                        province: obj.data.province,
+                        city: obj.data.city,
+                        county: obj.data.county,
+                    },
+                    change: function (res) {
+                        //选择结果
+                        console.log(res);
+                    }
+                });
+                form.render();
+            }
+        });
+
+        form.on('select(proxy_level)', function(data){
+            if (data.value == 2) {
+                $(".county").css('display', 'inline-block');
+            } else {
+                $(".county").css('display', 'none');
+            }
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                table.reload('user', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        username: $("input[name='username']").val(),
+                        mobile: $("input[name='mobile']").val(),
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.search').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>
+<script type="text/html" id="gradeTpl">
+    {{# if(d.grade_id == 3){ }}
+    团长
+    {{# } else if(d.grade_id == 59){ }}
+    区代理
+    {{# } }}
+</script>
+<script type="text/html" id="proxyLevel">
+    <input type="radio" name="proxy_level" value="1" title="区代理" {{ d.proxy_level == 1? 'checked' : '' }}>
+    <input type="radio" name="proxy_level" value="2" title="市代理" {{ d.proxy_level == 2? 'checked' : '' }}>
+</script>
+<script type="text/html" id="area_picker_demo">
+    <div class="" id="area-picker">
+        <span>代理等级:</span>
+        <div class="layui-input-inline" style="width: 150px;margin-right: 50px">
+            <select name="proxy_level" lay-filter="proxy_level">
+                <option value="">请选择代理等级</option>
+                <option value="1">市代理</option>
+                <option value="2">区代理</option>
+            </select>
+        </div>
+        <span>管辖范围:</span>
+        <div class="layui-input-inline" style="width: 200px;">
+            <select name="province" class="province-selector" data-value="" lay-filter="province-1">
+                <option value="">请选择省</option>
+            </select>
+        </div>
+        <div class="layui-input-inline" style="width: 200px;">
+            <select name="city" class="city-selector" data-value="" lay-filter="city-1">
+                <option value="">请选择市</option>
+            </select>
+        </div>
+        <div class="layui-input-inline county" style="width: 200px;">
+            <select name="county" class="county-selector" data-value="" lay-filter="county-1">
+                <option value="">请选择区</option>
+            </select>
+        </div>
+        <button type="button" class="layui-btn" lay-event="submit">提交</button>
+    </div>
+</script>
+</html>

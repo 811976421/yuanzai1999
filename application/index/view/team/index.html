@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .layui-form-checkbox i {
+            right: -10px;
+        }
+        .layui-table-cell {
+            height: 50px;
+            line-height: 50px;
+        }
+        .layui-table-cell, .layui-table-tool-panel li{
+            overflow:visible !important;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>我的团队</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline" style="min-width: 200px">
+            <input class="layui-input" name="mobile" placeholder="手机号" autocomplete="off">
+        </div>
+        <div class="layui-inline" style="min-width: 150px">
+            <input class="layui-input" name="username" placeholder="用户名" autocomplete="off">
+        </div>
+
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <table id="user" lay-filter="user"></table>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+
+    layui.use(['table', 'form'], function(){
+        var table = layui.table;
+
+        table.render({
+            elem: '#user'
+            ,defaultToolbar: []
+            ,cols: [[
+                {field: 'username', title: '用户名',fixed: 'left', minWidth: 200, style: 'word-wrap: break-word !important;word-break: break-all;overflow: hidden;'}
+                ,{field: 'mobile', title: '手机号'}
+                ,{field: 'avatar', title: '头像', templet: function(d){
+                    if (d.avatar != 0) {
+                        return "<img width='50' src=" + d.avatar + ' alt="">';
+                    } else {
+                        return '无';
+                    }
+                }}
+                ,{field: 'referrer', title: '邀请人', align: 'center'}
+                ,{field: 'code', title: '邀请码', align: 'center'}
+                ,{field: 'grade_id', title: '会员等级', templet: '#gradeTpl', align:'center', minWidth: 215}
+                ,{field: '', title: '团队', templet: function (d) {
+                        if (d.grade_id == '59') {
+                            return '<a href="/index/team/index?proxy_id='+d.id+'" class="layui-btn layui-btn-radius layui-btn-sm">查看代理团队</a>';
+                        } else {
+                            return '';
+                        }
+                    }, align:'center'}
+                ,{field: 'location', title: '地理位置',minWidth: 150}
+                ,{field: 'money', title: '余额'}
+                ,{field: 'score', title: '积分'}
+                ,{field: 'status', title: '用户状态', templet: '#statusTpl', align: 'center'}
+                ,{field: 'last_time', title: '登录时间', align: 'center'}
+                ,{title: '订单', align: 'center', minWidth: 100, templet: function (d) {
+                        return '<a href="/index/order/index?proxy_id='+d.id+'" class="layui-btn layui-btn-radius layui-btn-sm">查看订单</a>';
+                    }}
+            ]]
+            ,url: '/index/team/getlist?proxy_id=' + '{$proxy_id}'
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                table.reload('user', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                        username: $("input[name='username']").val(),
+                        mobile: $("input[name='mobile']").val(),
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.search').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+
+</script>
+<script type="text/html" id="gradeTpl">
+    {{# if(d.grade_id == 1){ }}
+    <span class="layui-badge">超级会员</span>
+    {{# } else if(d.grade_id == 2){ }}
+    <span class="layui-badge layui-bg-black">认证会员</span>
+    {{# } else if(d.grade_id == 3){ }}
+    <span class="layui-badge layui-bg-orange">团长</span>
+    {{# } else if(d.grade_id == 59){ }}
+    <span class="layui-badge layui-bg-cyan">区代理</span>
+    {{# if(d.power){ }}
+    ({{ d.power['province'] }}{{ d.power.city }}{{ d.power.county }})
+    {{# } }}
+    {{# } }}
+</script>
+<script type="text/html" id="statusTpl">
+    {{# if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-blue">正常</span>
+    {{# } else if(d.grade_id == 0){ }}
+    <span class="layui-badge layui-bg-gray">禁用</span>
+    {{# } }}
+</script>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        a {
+            cursor: pointer;
+        }
+        .layui-carousel button {
+            display: none;
+        }
+        .layui-carousel[lay-indicator=outside] {
+            margin-bottom: 0 !important;
+        }
+        .layui-carousel[lay-indicator=outside] .layui-carousel-ind ul {
+            background-color: #ffffff;
+        }
+        .layui-carousel-ind {
+            right: 15px;
+            position: absolute;
+            top: -43px;
+            text-align: right !important;
+        }
+        .layadmin-carousel .layui-carousel-ind li.layui-this {
+            background-color: #999;
+        }
+        .layadmin-carousel .layui-carousel-ind li {
+            background-color: #e2e2e2;
+        }
+        .layui-carousel[lay-indicator=outside] .layui-carousel-ind {
+            top: -30px;
+        }
+        .layui-carousel>[carousel-item] {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .layuiadmin-badge {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            margin-top: -9px;
+        }
+        .layuiadmin-card-list p.layuiadmin-big-font {
+            font-size: 36px;
+            color: #666;
+            line-height: 36px;
+            padding: 5px 0 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            white-space: nowrap;
+        }
+        .layuiadmin-span-color {
+            font-size: 14px;
+            position: absolute;
+            right: 15px;
+        }
+        .layadmin-backlog .layadmin-backlog-body {
+            height: 80px;
+            display: block;
+            padding: 10px 15px;
+            background-color: #f8f8f8;
+            color: #999;
+            border-radius: 2px;
+            transition: all .3s;
+            -webkit-transition: all .3s;
+        }
+        .layadmin-backlog-body h3 {
+            padding-bottom: 15px;
+            font-size: 12px;
+        }
+        .layadmin-backlog-body p cite {
+            font-style: normal;
+            font-size: 30px;
+            font-weight: 300;
+            color: #FF5722;
+        }
+        #hiddenBlock {
+            display: none;
+            padding: 15px;
+            min-width: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator=""></span>
+    </div>
+</div>
+<div style="background-color: #eee;padding: 7.5px">
+
+    <div class="layui-col-sm6 layui-col-md9">
+        <div>
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px;">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        淘客订单总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge">今日</span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+                        <p class="layuiadmin-big-font" id="today_success_count">{$taoke_order}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color" id="today_sum_count">###</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px;">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        自营商城总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge">今日</span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+
+                        <p class="layuiadmin-big-font" id="today_success_amount">{$mall}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color" id="today_sum_amount">###</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px;">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        O2O商城总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge"></span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+
+                        <p class="layuiadmin-big-font" id="today_profit">{$o2o}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color" id="">###</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px;">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        线下总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge">今日</span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+
+                        <p class="layuiadmin-big-font">{$down_pay}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color">###</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        升级总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge"></span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+
+                        <p class="layuiadmin-big-font">{$upgrade}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color">###</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm6 layui-col-md4" style="padding: 7.5px">
+                <div class="layui-card">
+                    <div class="layui-card-header">
+                        手拉淘新总收益
+<!--                        <span class="layui-badge layui-bg-blue layuiadmin-badge">今日</span>-->
+                    </div>
+                    <div class="layui-card-body layuiadmin-card-list">
+
+                        <p class="layuiadmin-big-font">{$newuser}</p>
+                        <p>
+                            ###
+                            <span class="layuiadmin-span-color">### </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-col-sm6 layui-col-md3" style="padding: 7.5px;">
+        <div class="layui-card">
+            <div class="layui-card-header">待办事项(笔数)</div>
+            <div class="layui-card-body" style="position: relative;padding: 12px 15px;line-height: 24px;">
+                <div class="layui-carousel layadmin-carousel layadmin-backlog" lay-anim="" lay-indicator="inside" lay-arrow="none" style="width: 100%; height: 223px;">
+                    <div carousel-item="">
+                        <ul class="layui-row layui-col-space12 layui-this" style="background-color: white">
+                            <li class="layui-col-xs6">
+                                <a class="layadmin-backlog-body" data-id="69">
+                                    <h3>自营待审</h3>
+                                    <p><cite id="wait_recharge"></cite></p>
+                                </a>
+                            </li>
+                            <li class="layui-col-xs6">
+                                <a class="layadmin-backlog-body" data-id="68">
+                                    <h3 id="time_out">o2o待审</h3>
+                                    <p><cite id="waitWithdraw"></cite></p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-col-md3" style="background-color: white">
+
+    </div>
+    <div class="layui-col-md9" style="background-color: black">
+
+    </div>
+
+    <div class="layui-col-md12" style="padding: 7.5px;">
+        <div class="layui-card">
+            <div class="layui-card-header">
+                订单趋势图
+            </div>
+            <div class="layui-card-body echarts1">
+                <div id="rightContainer" style="height: 400px;width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div id="hiddenBlock">
+    <table id="sourceData" lay-filter="sourceData"></table>
+</div>
+</body>
+{include file="public/footer" /}
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts-stat/dist/ecStat.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/dataTool.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/world.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/dist/extension/bmap.min.js"></script>
+<script>
+
+    $('a').click(function () {
+        parent.select($(this).data('id'));
+    });
+
+    var dom = document.getElementById("rightContainer");
+    var myChart1 = echarts.init(dom);
+    var app1 = {};
+    option1 = null;
+    option1 = {
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#636363'
+                }
+            }
+        },
+        legend: {
+            data: ['订单总数','订单完成数']
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: false,
+                data: {$days}
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value'
+            }
+        ],
+        series: [
+            {
+                name: '订单总数',
+                type: 'line',
+                stack: '总量',
+                areaStyle: {},
+                data: {$order_sum_count}
+            },
+            {
+                name: '订单完成数',
+                type: 'line',
+                stack: '完成量',
+                areaStyle: {},
+                data: {$order_success_count}
+            },
+        ]
+    };
+
+    if (option1 && typeof option1 === "object") {
+        myChart1.setOption(option1, true);
+    };
+</script>
+</html>

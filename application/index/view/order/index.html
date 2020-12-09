@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .popup {
+            display: none;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>用户订单</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline">
+            <input class="layui-input" name="" placeholder="" autocomplete="off">
+        </div>
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-tab" lay-filter="order">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="1">淘客订单</li>
+                <li lay-id="2">自营订单</li>
+                <li lay-id="3">o2o订单</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <table id="table1" lay-filter="table1"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <table id="table2" lay-filter="table2"></table>
+                </div>
+                <div class="layui-tab-item">
+                    <table id="table3" lay-filter="table3"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    layui.use(['element', 'laydate', 'table'], function(){ //加载code模块
+        var element = layui.element,
+            laydate = layui.laydate,
+            table = layui.table;
+
+
+        var ins1 = table.render({
+            elem: '#table1'
+            ,url: '/index/order/getlist?proxy_id=' + {$proxy_id} + '&type=' + 1 //数据接口
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+            ,cols: [[ //表头
+                {field: 'type', title: '订单类型', templet: '#typeTpl'}
+                ,{field: 'goods_order', title: '订单号'}
+                ,{field: 'order_status', title: '订单状态', templet: '#status1Tpl'}
+                ,{field: 'pay_price', title: '付款金额'}
+                ,{field: 'settlement_price', title: '结算金额'}
+                ,{field: 'commission_rate', title: '佣金比例'}
+                ,{field: 'commission', title: '预估佣金'}
+                ,{field: 'create_time', title: '创建时间'}
+                ,{field: 'earning_time', title: '结算时间', templet: function (d) {
+                        if (d.earning_time == '1970-01-01 08:00:00') {
+                            return '无'
+                        } else {
+                            return d.earning_time;
+                        }
+                    }
+                }
+            ]]
+        });
+
+        var ins2 = table.render({
+            elem: '#table2'
+            ,url: '/index/order/getlist?proxy_id=' + {$proxy_id} + '&type=' + 2 //数据接口
+            ,page: true
+            ,limit: 10
+            ,cols: [[ //表头
+                {field: '', title: '订单类型', templet: function (d) {
+                    return '自营';
+                }}
+                ,{field: 'goods_order', title: '订单号'}
+                ,{field: 'status', title: '订单状态', templet: '#status2Tpl'}
+                ,{field: 'pay_price', title: '付款金额'}
+                ,{field: 'settlement_price', title: '结算金额'}
+                ,{field: 'commission_rate', title: '佣金比例'}
+                ,{field: 'commission', title: '预估佣金'}
+                ,{field: 'create_time', title: '创建时间'}
+                ,{field: 'earning_time', title: '结算时间', templet: function (d) {
+                        if (d.earning_time == '1970-01-01 08:00:00') {
+                            return '无'
+                        } else {
+                            return d.earning_time;
+                        }
+                    }
+                }
+            ]]
+        });
+
+        var ins3 = table.render({
+            elem: '#table3'
+            ,url: '/index/order/getlist?proxy_id=' + {$proxy_id} + '&type=' + 3 //数据接口
+            ,page: true
+            ,limit: 10
+            ,cols: [[ //表头
+                {field: '', title: '订单类型', templet: function (d) {
+                        return 'o2o';
+                    }}
+                ,{field: 'goods_order', title: '订单号'}
+                ,{field: 'status', title: '订单状态', templet: '#status3Tpl'}
+                ,{field: 'pay_price', title: '付款金额'}
+                ,{field: 'settlement_price', title: '结算金额'}
+                ,{field: 'commission_rate', title: '佣金比例'}
+                ,{field: 'commission', title: '预估佣金'}
+                ,{field: 'create_time', title: '创建时间'}
+                , {
+                    field: 'earning_time', title: '结算时间', templet: function (d) {
+                        if (d.earning_time == '1970-01-01 08:00:00') {
+                            return '无'
+                        } else {
+                            return d.earning_time;
+                        }
+                    }
+                }
+            ]]
+        });
+
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                table.reload('table1', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                    }
+                }, 'data');
+
+                table.reload('table2', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                    }
+                }, 'data');
+
+                table.reload('table3', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.search').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+    });
+</script>
+<script type="text/html" id="typeTpl">
+    {{# if(d.type == 0){ }}
+    淘宝
+    {{# } else if(d.type == 1){ }}
+    拼多多
+    {{# } else if(d.type == 2){ }}
+    京东
+    {{# } else if(d.type == 3){ }}
+    唯品会
+    {{# } else if(d.type == 4){ }}
+    蘑菇街
+    {{# } else if(d.type == 5){ }}
+    多麦
+    {{# } else if(d.type == 6){ }}
+    苏宁
+    {{# } }}
+</script>
+<script type="text/html" id="status1Tpl">
+    {{# if(d.order_status == 2){ }}
+    订单退款
+    {{# } else if(d.order_status == 3){ }}
+    订单结算
+    {{# } else if(d.order_status == 12){ }}
+    订单付款
+    {{# } else if(d.order_status == 13){ }}
+    订单失效
+    {{# } }}
+</script>
+<script type="text/html" id="status2Tpl">
+    {{# if(d.status == 1){ }}
+    待付款
+    {{# } else if(d.status == 2){ }}
+    已付款
+    {{# } else if(d.status == 3){ }}
+    已发货
+    {{# } else if(d.status == 4){ }}
+    已收货
+    {{# } else if(d.status == 5){ }}
+    已完成
+    {{# } else if(d.status == 20){ }}
+    已失效
+    {{# } }}
+</script>
+<script type="text/html" id="status3Tpl">
+    {{# if(d.status == 1){ }}
+    待付款
+    {{# } else if(d.status == 2){ }}
+    已付款
+    {{# } else if(d.status == 3){ }}
+    已发货
+    {{# } else if(d.status == 4){ }}
+    已收货
+    {{# } else if(d.status == 5){ }}
+    已完成
+    {{# } else if(d.status == 20){ }}
+    已失效
+    {{# } }}
+</script>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+            <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+            <a><cite>权限管理</cite></a><span lay-separator="">/</span>
+            <a><cite>节点列表</cite></a><span lay-separator="">/</span>
+        </div>
+    </div>
+
+
+    <div class="layui-card" style="margin: 15px">
+        <div class="layui-card-header" style="padding:10px 15px;">
+            <button class="layui-btn add">添加节点</button>
+            <div style="position: absolute;right: 15px;top: 10px">
+                <button class="layui-btn nor">批量启用</button>
+                <button class="layui-btn layui-btn-danger dis">批量禁用</button>
+                <button class="layui-btn layui-btn-danger del">批量删除</button>
+            </div>
+
+        </div>
+        <div class="layui-card-body">
+            <table class="layui-table layui-form" id="tree-table"></table>
+        </div>
+    </div>
+</body>
+</html>

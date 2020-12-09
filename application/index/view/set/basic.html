@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>个人中心</cite></a><span lay-separator="">/</span>
+        <a><cite>基本资料</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header">
+        设置我的资料
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form" lay-filter="setmyinfo" id="myInfo">
+            <div class="layui-form-item">
+                <label class="layui-form-label">我的角色</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="{$info.role_name}" readonly="" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">不可修改</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" value="{$info.username}" readonly class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">不可修改。一般用于后台登入名</div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">昵称</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="nickname" value="{$info.nickname}" autocomplete="off" placeholder="请输入昵称" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="sex" value="1" title="男" {if $info.sex == 1}checked{/if}>
+                    <input type="radio" name="sex" value="0" title="女" {if $info.sex == 0}checked{/if}>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">头像</label>
+                <div class="layui-input-inline">
+                    <input name="head_img" lay-verify="required" placeholder="头像地址" value="{$info.head_img}" class="layui-input" readonly>
+                </div>
+                <div class="layui-input-inline layui-btn-container" style="width: auto;">
+                    <button type="button" class="layui-btn" id="avatar">
+                        <i class="layui-icon">&#xe67c;</i>上传图片
+                    </button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline">
+                    <img src="{$info.head_img}" style="width: 190px;height: 190px" onerror="this.src='/static/img/noavatar.png'" id="headImg">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">手机</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="phone_num" value="{$info.phone_num}" lay-verify="phone" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="email" value="{$info.email}" lay-verify="email" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea name="remarks" placeholder="请输入内容" class="layui-textarea">{$info.remarks}</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit lay-filter="setmyinfo">确认修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+{include file="public/footer" /}
+<script>
+    layui.use(['form', 'upload'], function(){
+        var upload = layui.upload;
+        var form = layui.form;
+
+        form.on('submit(setmyinfo)', function(data){
+           $.ajax({
+               url: '/index/set/handler',
+               data: form.val("setmyinfo"),
+               dataType: 'json',
+               type: 'post',
+               success:function (res) {
+                   if (res.code == 200) {
+                       notice.success(res.message);
+                   } else {
+                       notice.error(res.message);
+                   }
+               }
+           })
+        });
+
+        upload.render({
+            elem: '#avatar'
+            ,url: '/index/upload/index?dir=avatar'
+            ,accept: 'images'
+            ,acceptMime: 'image/*'
+            ,size: 5000
+            ,auto: true
+            ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                layer.load(); //上传loading
+            }
+            ,done: function(res){
+                layer.closeAll('loading');
+                layer.msg('上传成功');
+                $('#headImg').attr('src', res.data.src);
+                $("input[name='head_img']").val(res.data.src);
+            }
+            ,error: function(index, upload){
+                layer.closeAll('loading'); //关闭loading
+            }
+        });
+    });
+
+</script>
+</html>

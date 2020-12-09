@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>管理系统</title>
+    <link href="/static/css/app.css" rel="stylesheet">
+    <link href="/static/css/login.css" rel="stylesheet">
+    <link href="/static/css/chunk-vendors.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <style>
+        .el-form-item__error {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div  class="login-wrap" style="background-image: url(/static/img/login-bg.jpg);height: 100%">
+        <div  class="ms-login">
+            <div  class="ms-title">管理员登录</div>
+            <form  class="el-form ms-content">
+                <div  class="el-form-item is-required el-form-item--small"><!---->
+                    <div class="el-form-item__content" style="margin-left: 0px;">
+                        <div  class="el-input el-input--small el-input-group el-input-group--prepend">
+                            <div class="el-input-group__prepend">
+                                <button  type="button"
+                                        class="el-button el-button--default el-button--small">
+                                    <i class="layui-icon layui-icon-username" style="color: #1E9FFF;"></i>
+                                </button>
+                            </div>
+                            <input type="text" autocomplete="off" placeholder="username" class="el-input__inner" id="username"><!---->
+                        </div>
+                        <div class="el-form-item__error username">
+                            请输入用户名
+                        </div>
+                    </div>
+                </div>
+                <div  class="el-form-item is-required el-form-item--small"><!---->
+                    <div class="el-form-item__content" style="margin-left: 0px;">
+                        <div  class="el-input el-input--small el-input-group el-input-group--prepend">
+                            <div class="el-input-group__prepend">
+                                <button  type="button"
+                                        class="el-button el-button--default el-button--small"><!---->
+                                    <i class="layui-icon layui-icon-password" style="color: #1E9FFF;"></i>
+                                </button>
+                            </div>
+                            <input type="password" autocomplete="off" placeholder="password" class="el-input__inner" id="password">
+                        </div>
+                        <div class="el-form-item__error password">
+                            请输入密码
+                        </div>
+                    </div>
+                </div>
+                <div  class="login-btn">
+                    <button  type="button" class="el-button el-button--primary el-button--small">
+                        <!----><!----><span>登录</span></button>
+                </div>
+                <p  class="login-tips">Tips : 没啥要说的。</p></form>
+        </div>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    $(function () {
+        $('#username').on('change click', function () {
+            $('#username').css('border-color', '#409eff');
+            $('.username').css('display', 'none');
+        });
+
+        $('#password').on('change click', function () {
+            $('#password').css('border-color', '#409eff');
+            $('.password').css('display', 'none');
+        });
+
+        $('#username,#password').on('blur', function () {
+            $('#username,#password').css('border-color', '#c0c4cc');
+        });
+
+        $('button').on('click', function () {
+            login();
+        });
+
+        $('body').keydown(function () {
+            if (event.keyCode == 13) {
+                login();
+            };
+        });
+    });
+
+    function login() {
+
+        var username = $('#username').val().trim(),
+            password = $('#password').val().trim();
+
+        if (!username) {
+            $('#username').css('border-color', 'red');
+            $('.username').css('display', 'block');
+            return false;
+        }
+
+        if (!password) {
+            $('#password').css('border-color', 'red');
+            $('.password').css('display', 'block');
+            return false;
+        }
+
+        $.ajax({
+            url: '/index/login/check',
+            data: {
+                'account': username,
+                'password': password,
+            },
+            type: 'post',
+            dataType: 'json',
+            success: function (res) {
+                if (res.code == 200) {
+                    window.location.href = '/index/index/index';
+                } else {
+                    notice.error(res.message);
+                }
+            }
+        })
+    }
+
+</script>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .popup {
+            display: none;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-card layadmin-header">
+        <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+            <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+            <a><cite>权限管理</cite></a><span lay-separator="">/</span>
+            <a><cite>节点列表</cite></a><span lay-separator="">/</span>
+        </div>
+    </div>
+
+    <div class="layui-card" style="margin: 15px">
+        <div class="layui-card-header" style="padding:10px 15px;">
+            <button class="layui-btn add">添加节点</button>
+            <div style="position: absolute;right: 15px;top: 10px">
+                <button class="layui-btn nor">批量启用</button>
+                <button class="layui-btn layui-btn-danger dis">批量禁用</button>
+                <button class="layui-btn layui-btn-danger del">批量删除</button>
+            </div>
+
+        </div>
+        <div class="layui-card-body">
+            <table class="layui-table layui-form" id="tree-table"></table>
+        </div>
+    </div>
+
+    <div class="popup">
+        <form class="layui-form layui-form-pane" action="/index/rule/handler" lay-filter="popupForm" method="post">
+            <input type="hidden" name="id" value="">
+            <input type="hidden" name="pid" value="0">
+            <div class="layui-form-item">
+                <label class="layui-form-label">父节点</label>
+                <div class="layui-input-block">
+                    <select name="pid" lay-verify="required" lay-search>
+                        <option value="0">根节点</option>
+                        {volist name="nodes" id="vo"}
+                        <option value="{$vo.id}">{$vo.rule_name}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">节点名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="rule_name" required  lay-verify="required" placeholder="请输入节点名称" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">节点别名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="rule_alias" placeholder="请输入节点别名" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">排序</label>
+                <div class="layui-input-block">
+                    <input type="text" name="sort" required lay-verify="required|number" placeholder="请输入排序" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">节点图标</label>
+                <div class="layui-input-block">
+                    <input type="text" name="icon" placeholder="请输入图标" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">节点状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常" checked>
+                    <input type="radio" name="status" value="0" title="禁用">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单可见</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="is_show" value="1" title="显示" checked>
+                    <input type="radio" name="is_show" value="0" title="隐藏">
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+</body>
+{include file="public/footer" /}
+<script>
+
+    layui.config({
+        base: '/static/js/',
+    });
+
+    layui.use(['treeTable','layer','code','form'],function() {
+        var o = layui.$,
+            form = layui.form,
+            layer = layui.layer,
+            treeTable = layui.treeTable;
+        var re = treeTable.render({
+            elem: '#tree-table',
+            url: '/index/rule/getNodes',
+            icon_key: 'rule_name',
+            is_checkbox: true,
+            end: function (e) {
+                form.render();
+            },
+            cols: [
+                {
+                    key: 'rule_name',
+                    title: '节点名称',
+                    width: '50%',
+                    template: function (item) {
+                        if (item.level == 0) {
+                            return '<span style="color:#333;">' + item.rule_name + '</span>';
+                        } else if (item.level == 1) {
+                            return '<span style="color:#666;">' + item.rule_name + '</span>';
+                        } else if (item.level == 2) {
+                            return '<span style="color:#777;">' + item.rule_name + '</span>';
+                        }
+                    }
+                },
+                {
+                    key: 'sort',
+                    title: '排序',
+                    width: '10%',
+                    align: 'center',
+                },
+                {
+                    key: 'status',
+                    title: '节点状态',
+                    width: '10%',
+                    align: 'center',
+                    template: function (item) {
+                        if (item.status == 0) {
+                            return '<span class="layui-badge">' + '禁用' + '</span>';
+                        } else {
+                            return '<span class="layui-badge layui-bg-blue">' + '正常' + '</span>';
+                        }
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    width: '20%',
+                    template: function (item) {
+                        return '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-filter="edit">编辑</a>  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-filter="del">删除</a>';
+                    }
+                }
+            ]
+        });
+
+        // 监听自定义
+        treeTable.on('tree(edit)',function(data){
+            form.val("popupForm", {
+                "id" : data.item.id,
+                "pid": data.item.pid,
+                "rule_name" : data.item.rule_name,
+                "rule_alias" : data.item.rule_alias,
+                "icon" : data.item.icon,
+                "sort" : data.item.sort,
+                "status" : data.item.status,
+                "is_show" : data.item.is_show
+            });
+            form.render();
+            pop('编辑节点');
+        });
+
+        // 监听自定义
+        treeTable.on('tree(del)',function(data){
+            del(data.item.id);
+        });
+
+        function pop(title) {
+            layer.open({
+                type: 1,
+                title: title,
+                offset: ['100px', '400px'],
+                skin: 'layui-layer-molv',
+                content: $('.popup'),
+                btn: ['确认', '取消'],
+                yes: function(index, layero){
+                    $.ajax({
+                        url: '/index/rule/handler',
+                        data: form.val("popupForm"),
+                        dataType: 'json',
+                        type: 'post',
+                        success:function (res) {
+                            if (res.code == 200) {
+                                layer.close(index);
+                                notice.success(res.message);
+                                setTimeout(function () {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                notice.error(res.message);
+                            }
+                        }
+                    });
+                },
+                closeBtn: 2,
+                anim: 5,
+                resize: false,
+                scrollbar: false,
+            });
+        }
+
+        $('.add').click(function () {
+            pop('添加节点');
+        });
+
+        $('.nor').click(function () {
+            var ids = treeTable.checked(re).join(',');
+            inhibit(ids, 1);
+        });
+
+        $('.dis').click(function () {
+            var ids = treeTable.checked(re).join(',');
+            inhibit(ids, 0);
+        });
+
+        $('.del').click(function () {
+            var ids = treeTable.checked(re).join(',');
+            del(ids);
+        })
+    });
+
+    function inhibit(ids, status) {
+        if (ids.length == 0) {
+            layer.msg('请选择');
+            return false;
+        }
+        $.ajax({
+            url: '/index/rule/batchForbid',
+            data: {
+                'ids': ids,
+                'status': status,
+            },
+            dataType: 'json',
+            type: 'post',
+            success:function (res) {
+                if (res.code == 200) {
+                    notice.success(res.message);
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1000)
+                } else {
+                    notice.error(res.message);
+                }
+            }
+        })
+    }
+    
+    function del(ids) {
+
+        if (ids.length == 0) {
+            layer.msg('请选择');
+            return false;
+        }
+
+        layer.confirm('确认删除节点?', {icon: 3, title:'提示'}, function(index){
+            //do something
+            layer.close(index);
+            $.ajax({
+                url: '/index/rule/batchDelete',
+                data: {
+                    'ids': ids,
+                },
+                dataType: 'json',
+                type: 'post',
+                success:function (res) {
+                    if (res.code == 200) {
+                        notice.success(res.message);
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000)
+                    } else {
+                        notice.error(res.message);
+                    }
+                }
+            });
+        });
+    }
+</script>
+</html>

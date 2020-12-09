@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{$title}</title>
+    {include file="public/headerCss" /}
+    <script>
+        function select(id) {
+            layui.hxNav('select', id);
+        }
+    </script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header top-header">
+        <div class="layui-logo">
+            叁壹玖
+        </div>
+        <ul class="layui-nav layui-layout-left" style="padding: 0 !important;">
+            <li class="layui-nav-item" id="left_switch" style="display: none;">
+                <a href="javascript:;">
+                    <i class="layui-icon layui-icon-spread-left direction" style="font-size: 14px !important;margin-right: 0 !important;"></i>
+                </a>
+            </li>
+            <li class="layui-nav-item" style="display: none;padding: 0 !important;" id="refresh">
+                <a href="javascript:;" title="刷新">
+                    <i class="layui-icon layui-icon-refresh-3" style="font-size: 14px !important;margin-right: 0 !important;"></i>
+                </a>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <img src="{$Think.session.adminInfo.head_img}" class="layui-nav-img" onerror="this.src='/static/img/noavatar.png'">
+                {$Think.session.adminInfo.username}
+            </li>
+            <li class="layui-nav-item"><a href="/index/login/logout">退出</a></li>
+        </ul>
+    </div>
+
+    <div id="hxNavbar"></div>
+
+    <div class="layui-body content-body">
+        <!-- 内容主体区域 -->
+        {switch name="Think.session.adminInfo.role_id"}
+            {case value="1"}<iframe id="iFrame1" src="/index/home/index" width="100%" frameborder="0" ></iframe>{/case}
+            {case value="3"}<iframe id="iFrame1" src="/index/home/index" width="100%" frameborder="0" ></iframe>{/case}
+            {case value="5"}<iframe id="iFrame1" src="/index/home/index" width="100%" frameborder="0" ></iframe>{/case}
+            {case value="6"}<iframe id="iFrame1" src="/index/member/index" width="100%" frameborder="0" ></iframe>{/case}
+        {/switch}
+    </div>
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © - 底部固定区域
+    </div>
+    {include file="public/footer" /}
+</div>
+</body>
+<script>
+    $(function () {
+        var interval;
+        $('#broadcast').click(function () {
+            if ($(this).find('i').hasClass('layui-icon-mute')) {
+                notice.info('广播开启');
+                $(this).find('i').removeClass('layui-icon-mute').addClass('layui-icon-speaker');
+                interval = setInterval(function () {
+                    $.get("/index/notice/prompt", function(data){
+                        if (data.code == 200){
+                            var audio = new Audio(data.data);    //获取本地音频文件，ogg，mp3都可以
+                            audio.play();    //执行播放操作
+                        }
+                    }, 'json');
+                }, 1000);
+            } else {
+                notice.info('广播关闭');
+                $(this).find('i').removeClass('layui-icon-speaker').addClass('layui-icon-mute');
+                clearInterval(interval);
+            }
+        });
+
+        $('.layui-nav-child a').click(function () {
+            select($(this).data('id'));
+        });
+
+        $('.notice').click(function () {
+            select($(this).data('id'));
+        });
+
+        $('#refresh').click(function () {
+            $('#iFrame1').attr('src', $('#iFrame1').attr('src'));
+        });
+
+        var mobile_flag = isMobile(); // true为PC端，false为手机端
+
+        if(mobile_flag){
+            $('#left_switch').css('display', 'inline-block');
+            $('#hxNavbar').animate({left:'-200px'});
+            $('.top-header').animate({left:'-200px'});
+            $('.content-body').animate({left:'0'});
+            $('.top-header').css('margin-right','-200px');
+            $('#broadcast').css('display', 'none');
+            $('#refresh').css('display', 'inline-block');
+        }
+        
+        $('#left_switch').click(function () {
+            if ($('.direction').hasClass('layui-icon-shrink-right')) {
+                $('.direction').removeClass('layui-icon-shrink-right').addClass('layui-icon-spread-left');
+                $('#hxNavbar').animate({left:'-200px'});
+                $('.top-header').animate({left:'-200px'});
+                $('.content-body').animate({left:'0'});
+            } else {
+                $('.direction').removeClass('layui-icon-spread-left').addClass('layui-icon-shrink-right');
+                $('#hxNavbar').animate({left:'0'});
+                $('.top-header').animate({left:'0'});
+                $('.content-body').animate({left:'200px'});
+            }
+        });
+    });
+
+    layui.config({
+        base: '/static/js/'
+    });
+
+    layui.extend({
+        hxNav: 'hxNav'  // 根据你自己的目录设置
+    }).use(['element','hxNav'],function(){
+        layui.hxNav({
+            element: '#hxNavbar',        // 必须，指定ID
+            url: '/index/menu/getNodes',  // 请求后台数据的接口
+            type: 'post',
+            shrink: true,
+            width: '200',
+            autoExpand: true,
+            selected: 5,
+            onSelect: function(v) {
+                if (v && v.href) {
+                    $('iframe').attr('src', '/index/' + v.href);
+                }
+            },
+        });
+    });
+</script>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>权限管理</cite></a><span lay-separator="">/</span>
+        <a><cite>权限设置</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header layui-form layui-form-pane" style="padding:10px 15px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">切换角色</label>
+            <div class="layui-input-block">
+                <select name="role" lay-filter="changeRole">
+                    {volist name="roles" id="vo"}
+                    <option value="{$vo.id}" {if $role_id == $vo.id}selectet{/if}>{$vo.role_name}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item" pane>
+                <label class="layui-form-label">权限树</label>
+                <div class="layui-input-block">
+                    <div id="LAY-auth-tree-index"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" id="submit" type="button">提交</button>
+                    <button class="layui-btn layui-btn-primary" type="reset">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+{include file="public/footer" /}
+<script>
+    layui.config({
+        base: '/static/plugins/layui_exts/',
+    }).extend({
+        authtree: 'authtree',
+    });
+
+    layui.use(['jquery', 'authtree', 'form', 'layer'], function(){
+        var $ = layui.jquery;
+        var authtree = layui.authtree;
+        var form = layui.form;
+        var layer = layui.layer;
+        // 一般来说，权限数据是异步传递过来的
+        getTrees('{$role_id}');
+
+        function getTrees(role_id) {
+            $.ajax({
+                url: '/index/rule/authTree?role_id=' + role_id,
+                dataType: 'json',
+                success: function(res){
+                    var trees = authtree.listConvert(res.data.list, {
+                        'primaryKey': 'id',
+                        'startPid': 0,
+                        'parentKey': 'pid',
+                        'nameKey': 'rule_name',
+                        'valueKey': 'id',
+                        'checkedKey' : res.data.checkedId
+                    });
+                    // 如果后台返回的不是树结构，请使用 authtree.listConvert 转换
+                    authtree.render('#LAY-auth-tree-index', trees, {
+                        inputname: 'authids[]',
+                        layfilter: 'lay-check-auth',
+                        autowidth: true,
+                        openall: true,
+                    });
+                }
+            });
+        }
+
+        form.on('select(changeRole)', function(data){
+            getTrees(data.value);
+        });
+
+        $('#submit').click(function () {
+            var rule_ids = authtree.getChecked('#LAY-auth-tree-index');
+            var role_id = $('select').val();
+
+            $.ajax({
+                url: '/index/rule/authHandler',
+                data: {
+                    'rules': rule_ids,
+                    'role_id': role_id,
+                },
+                dataType: 'json',
+                type: 'post',
+                success:function (res) {
+                    if (res.code == 200) {
+                        notice.success(res.message);
+                    } else {
+                        notice.success(res.message);
+                    }
+                }
+            })
+        })
+    });
+</script>
+</html>

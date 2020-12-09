@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .layui-form-checkbox i {
+            right: -10px;
+        }
+        .layui-table-cell {
+            height: 50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>自营商城</cite></a><span lay-separator="">/</span>
+        <a><cite>订单列表</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline">
+            <input class="layui-input" name="" placeholder="" autocomplete="off">
+        </div>
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <table id="order" lay-filter="order"></table>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    layui.use(['table', 'form', 'layer'], function(){
+        var table = layui.table,
+            layer = layui.layer;
+
+        table.render({
+            elem: '#order'
+            ,title: '自营订单表'
+            ,cols: [[
+                {field: 'username', title: '买家用户', minWidth: 120}
+                ,{field: 'goods_order', title: '订单号', minWidth: 180}
+                ,{field: '', title: '商品图片', templet: function(d){
+                        return "<img width='50' src=__IMAGE__" + d.img + ' alt="">';
+                    }}
+                ,{field: '', minWidth: 150, title: '购买商品详情', templet: function (d) {
+                        return '<span onmouseover="layer.tips(\'商品名称：'+d.title+'</br>商品单价：'+d.price +'</br>商品型号：'+d.goods_attr+'</br>购买数量：'+d.total_num+'\', this, {tips: 1})">查看购买商品详情</span>';
+                    }}
+                ,{field: 'shop_name', minWidth: 130, title: '店铺详情', templet: function (d) {
+                        return '<span onmouseover="layer.tips(\'商家手机号：'+d.store_mobile+'</br>商家昵称：'+d.store_nickname +'</br>商家店铺：'+d.shop_name+'</br>店铺类型：'+d.store_type+'</br>联系人：'+d.store_contacts+'</br>联系人：'+d.store_contacts_mobile+'</br>邮箱：'+d.store_email+'</br>预留客服qq：'+d.store_qq+'\', this, {tips: 1});">查看店铺详情</span>';
+                    }}
+                ,{field: 'total_price', title: '订单总价'}
+                ,{field: 'status', title: '订单状态', templet: '#statusTpl'}
+                ,{field: 'refunds_status', title: '维权退款状态', templet: '#refundTpl'}
+                ,{field: '', title: '订单详情', templet: function (d) {
+                        return '<span onmouseover="layer.tips(\'订单商品总数：'+d.total_num+'</br>订单总价：'+d.total_price +'</br>邮费：'+d.total_postage+'</br>优惠券金额：'+d.coupon_price+'</br>余额抵扣金额：'+d.balance_deduction+'</br>积分抵扣金额：'+d.integral_deduction+'</br>实际支付：'+d.pay_price+'</br>支付方式：'+d.transact_type+'</br>支付时间：'+d.paymen_time+'\', this, {tips: 1})">查看订单详情</span>';
+                    }}
+                ,{field: 'create_time', title: '下单时间'}
+                ,{field: 'complete_time', title: '订单完成时间'}
+                ,{field: 'commission_rate', title: '佣金率'}
+                ,{field: 'commission', title: '预估收入'}
+                ,{field: 'reference_commission', title: '推荐人返佣'}
+                ,{field: 'agent_commission', title: '区域代理返佣'}
+            ]]
+            ,url: '/index/selfoperated/getorderlist?store_id=' + {$store_id}
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+        });
+
+    });
+</script>
+<script type="text/html" id="statusTpl">
+{{# if(d.status == 1){ }}
+<span class="layui-badge layui-bg-orange">待付款</span>
+{{# } else if(d.status == 2){ }}
+<span class="layui-badge layui-bg-green">已付款</span>
+{{# } else if(d.status == 3){ }}
+<span class="layui-badge layui-bg-cyan">已发货</span>
+{{# } else if(d.status == 4){ }}
+<span class="layui-badge layui-bg-gray">已收货</span>
+{{# } else if(d.status == 5){ }}
+<span class="layui-badge layui-bg-blue">已完成</span>
+{{# } else if(d.status == 20){ }}
+<span class="layui-badge">已失效</span>
+{{# } }}
+</script>
+<script type="text/html" id="refundTpl">
+    {{# if(d.refunds_status == 1){ }}
+    <span class="layui-badge layui-bg-orange">提款中</span>
+    {{# } else if(d.refunds_status == 2){ }}
+    <span class="layui-badge layui-bg-green">同意退款</span>
+    {{# } else if(d.refunds_status == 11){ }}
+    <span class="layui-badge layui-bg-blue">退款成功</span>
+    {{# } else if(d.refunds_status == 4){ }}
+    <span class="layui-badge">退款失败</span>
+    {{# } }}
+
+</script>
+</html>

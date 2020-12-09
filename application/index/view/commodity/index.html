@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {include file="public/headerCss" /}
+    <style type="text/css">
+        .layui-form-checkbox i {
+            right: -10px;
+        }
+        .layui-table-cell {
+            height: 50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-card layadmin-header">
+    <div class="layui-breadcrumb" lay-filter="breadcrumb" style="visibility: visible;">
+        <a onclick="parent.select(5)">主页</a><span lay-separator="">/</span>
+        <a><cite>商城</cite></a><span lay-separator="">/</span>
+        <a><cite>商品管理</cite></a><span lay-separator="">/</span>
+    </div>
+</div>
+
+
+<div class="layui-card" style="margin: 15px">
+    <div class="layui-card-header" style="padding:10px 15px;">
+        <div class="layui-inline" style="min-width: 200px">
+            <input class="layui-input" name="order_id" placeholder="" autocomplete="off">
+        </div>
+        <button class="layui-btn search" data-type="reload">搜索</button>
+    </div>
+    <div class="layui-card-body">
+        <table id="commodity" lay-filter="commodity"></table>
+    </div>
+</div>
+</body>
+{include file="public/footer" /}
+<script>
+    layui.use(['table', 'form'], function(){
+        var table = layui.table;
+
+        table.render({
+            elem: '#commodity'
+            ,title: '商品表'
+            ,cols: [[
+                {field: 'img', title: '商品主图', templet: function (d) {
+                        return "<img width='50' src=__IMAGE__" + d.img + " >";
+                    }}
+                ,{field: 'title', title: '商品标题', minWidth: '150'}
+                ,{field: 'type', title: '所属分类'}
+                ,{field: 'supply_price', title: '供货价'}
+                ,{field: 'price', title: '商品价格'}
+                ,{field: 'discount_price', title: '折扣价'}
+                ,{field: 'commission', title: '佣金率'}
+                ,{field: 'volume', title: '销量'}
+                ,{field: 'stock', title: '库存'}
+                ,{field: 'stock', title: '库存'}
+                ,{field: 'create_time', title: '添加时间'}
+                ,{field: 'status', title: '状态', templet: '#statusTpl', align: 'center', fixed:'right', minWidth: '100'}
+                ,{title: '操作', fixed: 'right', toolbar: '#bar', minWidth: '150', align: 'center'}
+            ]]
+            ,url: '/index/commodity/getlist?shop_id=' + {$shop_id} + '&store_id=' + {$store_id} + '&type=' + {$type}
+            ,page: true
+            ,limits: [10,50,100,500,1000]
+        });
+
+        table.on('tool(commodity)', function(obj){
+            var data = obj.data;
+            var layEvent = obj.event;
+
+        });
+    });
+</script>
+<script type="text/html" id="statusTpl">
+    {{# if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-blue">已上架</span>
+    {{# } else if(d.status == 0){ }}
+    <span class="layui-badge layui-bg-orange">未上架</span>
+    {{# } else if(d.status == 2){ }}
+    <span class="layui-badge layui-bg-green">审核中</span>
+    {{# } else if(d.status == 3){ }}
+    <span class="layui-badge">审核失败</span>
+    {{# } }}
+</script>
+</html>
